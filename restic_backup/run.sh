@@ -11,11 +11,13 @@ warn() { echo "[$(date '+%F %T')] WARNING: $*"; }
 err()  { echo "[$(date '+%F %T')] ERROR: $*" >&2; }
 
 notify() {
+  # notify_service: "script.benachrichtigung", "notify.mobile_app_x" or just "mobile_app_x"
   local msg="$1" url payload svc
-  payload="$(jq -n --arg t "Restic backup" --arg m "$msg" '{title:$t, message:$m}')"
+  payload="$(jq -n --arg t "Restic-Backup" --arg m "$msg" '{title:$t, message:$m}')"
   svc="$(cfg notify_service)"
   if [[ -n "$svc" ]]; then
-    url="http://supervisor/core/api/services/notify/${svc#notify.}"
+    [[ "$svc" == *.* ]] || svc="notify.${svc}"
+    url="http://supervisor/core/api/services/${svc%%.*}/${svc#*.}"
   else
     url="http://supervisor/core/api/services/persistent_notification/create"
   fi
@@ -23,12 +25,24 @@ notify() {
     -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
     -H "Content-Type: application/json" \
     -d "$payload" "$url" >/dev/null \
-    || warn "Could not send notification"
+    || warn "Could not send notification via ${url}"
+}
+
+report_success() {
+  # Creates/updates sensor.restic_last_backup so HA can detect stale backups
+  local payload
+  payload="$(jq -n --arg s "$(date -u +%Y-%m-%dT%H:%M:%S+00:00)" \
+    '{state:$s, attributes:{device_class:"timestamp", friendly_name:"Restic letztes Backup", icon:"mdi:cloud-check"}}')"
+  curl -sf -X POST \
+    -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "$payload" "http://supervisor/core/api/states/sensor.restic_last_backup" >/dev/null \
+    || warn "Could not update sensor.restic_last_backup"
 }
 
 fail() {
   err "$1"
-  notify "Backup FAILED: $1"
+  notify "Fehlgeschlagen: $1"
   exit 1
 }
 
@@ -109,4 +123,5 @@ if [[ "$(cfg run_check)" == "true" ]]; then
 fi
 
 log "Done."
+report_success
 restic stats --mode raw-data 2>/dev/null | tail -n 3 || true
