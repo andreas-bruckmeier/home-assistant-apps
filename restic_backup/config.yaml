@@ -1,10 +1,9 @@
 name: Restic Backup
-version: "1.0.0"
+version: "1.0.1"
 slug: restic_backup
 description: Push Home Assistant backups from /backup to a remote restic repository
 arch:
   - aarch64
-  - armv7
   - amd64
 startup: once
 boot: manual
