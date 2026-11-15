@@ -1,5 +1,5 @@
 name: Restic Backup
-version: "1.2.0"
+version: "1.2.1"
 slug: restic_backup
 description: Push Home Assistant backups from /backup to a restic REST server
 arch:
