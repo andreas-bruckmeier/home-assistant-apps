@@ -91,12 +91,16 @@ elif [[ $rc -ne 0 ]]; then
 fi
 
 # ---------- retention ----------
-log "Applying retention policy and pruning..."
-restic forget --host "$HOST_TAG" --tag homeassistant \
-  --keep-daily   "$(cfg keep_daily)" \
-  --keep-weekly  "$(cfg keep_weekly)" \
-  --keep-monthly "$(cfg keep_monthly)" \
-  --prune || fail "forget/prune failed"
+if [[ "$(cfg prune)" == "true" ]]; then
+  log "Applying retention policy and pruning..."
+  restic forget --host "$HOST_TAG" --tag homeassistant \
+    --keep-daily   "$(cfg keep_daily)" \
+    --keep-weekly  "$(cfg keep_weekly)" \
+    --keep-monthly "$(cfg keep_monthly)" \
+    --prune || fail "forget/prune failed"
+else
+  log "Pruning disabled (append-only server), skipping retention"
+fi
 
 # ---------- optional integrity check ----------
 if [[ "$(cfg run_check)" == "true" ]]; then

@@ -1,5 +1,5 @@
 name: Restic Backup
-version: "1.0.2"
+version: "1.0.3"
 slug: restic_backup
 description: Push Home Assistant backups from /backup to a remote restic repository
 arch:
@@ -22,6 +22,7 @@ options:
   rest_username: ""
   rest_password: ""
   env: []
+  prune: true
   keep_daily: 7
   keep_weekly: 4
   keep_monthly: 6
@@ -33,6 +34,7 @@ schema:
   rest_password: password?
   env:
     - str
+  prune: bool
   keep_daily: int(0,)
   keep_weekly: int(0,)
   keep_monthly: int(0,)
