@@ -41,6 +41,10 @@ export RCLONE_CONFIG=/config/rclone/rclone.conf
 [[ -n "$RESTIC_REPOSITORY" ]] || fail "No repository configured"
 [[ -n "$RESTIC_PASSWORD"   ]] || fail "No password configured"
 
+# Login for a REST server (rest-server / rclone serve restic)
+[[ -n "$(cfg rest_username)" ]] && export RESTIC_REST_USERNAME="$(cfg rest_username)"
+[[ -n "$(cfg rest_password)" ]] && export RESTIC_REST_PASSWORD="$(cfg rest_password)"
+
 # Extra environment variables, e.g. B2_ACCOUNT_ID=..., AWS_ACCESS_KEY_ID=...
 while IFS= read -r kv; do
   [[ "$kv" == *=* ]] && export "${kv?}"
