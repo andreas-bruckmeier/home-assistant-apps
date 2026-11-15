@@ -1,0 +1,37 @@
+name: Restic Backup
+version: "1.0.0"
+slug: restic_backup
+description: Push Home Assistant backups from /backup to a remote restic repository
+arch:
+  - aarch64
+  - armv7
+  - amd64
+startup: once
+boot: manual
+init: false
+homeassistant_api: true
+map:
+  - type: backup
+    read_only: true
+  - type: addon_config
+    read_only: false
+backup_exclude:
+  - "cache"
+options:
+  repository: ""
+  password: ""
+  env: []
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
+  run_check: false
+schema:
+  repository: str
+  password: password
+  env:
+    - str
+  keep_daily: int(0,)
+  keep_weekly: int(0,)
+  keep_monthly: int(0,)
+  run_check: bool
+  notify_service: str?
